@@ -3,15 +3,14 @@ import App from './App.vue'
 
 import router from '@/router'
 
-import TypeNav from '@/pages/Home/TypeNav'
+import store from './store'
+
+import TypeNav from '@/components/TypeNav'
 //将三级联动组件注册为全局组件
 // 第一个参数：全局组件的名字，第二个参数：哪一个组件
 Vue.component(TypeNav.name, TypeNav)
 
 Vue.config.productionTip = false
-
-import { reqCategoryList } from '@/api'
-reqCategoryList()
 
 new Vue({
   render: (h) => h(App),
@@ -21,4 +20,5 @@ new Vue({
    * $router：一般进行编程式导航进行路由跳转【push|replace】
    *  */
   router,
+  store, //注册仓库，注册之后组件的实例对象身上会多一个$store属性
 }).$mount('#app')
