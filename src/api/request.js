@@ -11,11 +11,12 @@ import 'nprogress/nprogress.css'
 const req = axios.create({
   baseURL: '/api', //基础路径
   timeout: 5000, //超时时间5s
-  headers: 'headers',
+  // headers: 'headers',
 })
 
 /**
  * 请求拦截器
+ * config 配置对象里边有一个配置属性很重要：headers请求头
  */
 req.interceptors.request.use((config) => {
   // 开启进度条
@@ -42,8 +43,8 @@ req.interceptors.response.use(
    * @param {响应失败的回调函数} error
    * @returns
    */
-  (error) => {
-    return new Promise.reject(new Error(error.message))
+  () => {
+    return new Promise.reject(new Error('error'))
   }
 )
 export default req

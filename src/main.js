@@ -10,6 +10,9 @@ Vue.component(TypeNav.name, TypeNav)
 
 Vue.config.productionTip = false
 
+import { reqCategoryList } from '@/api'
+reqCategoryList()
+
 new Vue({
   render: (h) => h(App),
   // 下方代码注册路由 ，不论是路由组件还是非路由组件身上都有了$route,$router
