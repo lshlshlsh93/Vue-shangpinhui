@@ -93,19 +93,24 @@ export default {
       //   '/search/' + this.keyword + '?k=' + this.keyword.toUpperCase()
       // )
       //第二种：模板字符串
-      this.$router.push(
-        `/search/${this.keyword}?k=${this.keyword.toUpperCase()}`
-      )
+      // this.$router.push(
+      //   `/search/${this.keyword}?k=${this.keyword.toUpperCase()}`
+      // )
       // 第三种：对象形式
-      // this.$router.push({
-      //   name: 'search',
-      //   params: {
-      //     keyword: this.keyword,
-      //   },
-      //   query: {
-      //     k: this.query.keyword.toUpperCase(),
-      //   },
-      // })
+
+      if (this.$route.query) {
+        let location = {
+          name: 'search',
+          params: {
+            keyword: this.keyword || undefined,
+          },
+        }
+        // 携带query参数
+        location.query = this.$route.query
+        // 路由跳转
+        this.$router.push(location)
+      }
+
       /** */
     },
   },
