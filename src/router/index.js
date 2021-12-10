@@ -65,6 +65,7 @@ export default new VueRouter({
     {
       name: 'search',
       path: '/search/:keyword', //:keyword是路由传参的占位符
+      //path: '/search',
       component: Search,
       meta: { show: true },
     },

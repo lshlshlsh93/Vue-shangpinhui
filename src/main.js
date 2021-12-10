@@ -22,6 +22,13 @@ Vue.config.productionTip = false
 
 new Vue({
   render: (h) => h(App),
+  /**
+   * 全局事件总线的配置
+   */
+  beforeCreate() {
+    Vue.prototype.$bus = this
+  },
+
   // 下方代码注册路由 ，不论是路由组件还是非路由组件身上都有了$route,$router
   /**
    * $route：一般获取路由信息：【路径、query、params等等】
