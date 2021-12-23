@@ -4,6 +4,7 @@
       <div class="fl key brand">品牌</div>
       <div class="value logos">
         <ul class="logo-list">
+          <!-- 品牌地方 -->
           <li
             v-for="trademark in trademarkList"
             :key="trademark.tmId"
@@ -18,11 +19,16 @@
         <a href="javascript:void(0);">更多</a>
       </div>
     </div>
+    <!-- 平台售卖属性 -->
     <div class="type-wrap" v-for="attr in attrsList" :key="attr.attrId">
       <div class="fl key">{{ attr.attrName }}</div>
       <div class="fl value">
         <ul class="type-list">
-          <li v-for="(i, index) in attr.attrValueList" :key="index">
+          <li
+            v-for="(i, index) in attr.attrValueList"
+            :key="index"
+            @click="showAttrInfo(attr, i)"
+          >
             <a>{{ i }}</a>
           </li>
         </ul>
@@ -43,6 +49,10 @@ export default {
     trademarkHandler(trademark) {
       // 点击品牌时，给父组件传递参数，让父组件发起服务器请求  -->自定义事件
       this.$emit('trademarkInfo', trademark)
+    },
+    // 平台售卖属性的回调
+    showAttrInfo(attr, attrVal) {
+      this.$emit('attrInfo', attr, attrVal)
     },
   },
 }

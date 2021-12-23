@@ -25,34 +25,44 @@
               {{ seachKeyWords.trademark.split(':')[1]
               }}<i @click="removeTrademark">×</i>
             </li>
+            <!-- 平台售卖属性的面包屑 -->
+            <li
+              class="with-x"
+              v-for="(attrVal, index) in seachKeyWords.props"
+              :key="index"
+            >
+              {{ attrVal.split(':')[1] }}<i @click="removeAttrVal(index)">×</i>
+            </li>
           </ul>
         </div>
 
         <!--selector-->
-        <SearchSelector @trademarkInfo="trademarkInfo" />
+        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo" />
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
+              <!-- 排序 -->
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{ active: isOne }" @click="changeOrder('1')">
+                  <a href="#"
+                    >综合<span
+                      v-show="isOne"
+                      class="iconfont"
+                      :class="{ 'icon-up': isAsc, 'icon-down': isDesc }"
+                    ></span
+                  ></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+
+                <li :class="{ active: isTwo }" @click="changeOrder('2')">
+                  <a href="#"
+                    >价格<span
+                      v-show="isTwo"
+                      class="iconfont"
+                      :class="{ 'icon-up': isAsc, 'icon-down': isDesc }"
+                    ></span
+                  ></a>
                 </li>
               </ul>
             </div>
@@ -98,35 +108,16 @@
               </li>
             </ul>
           </div>
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+          <!-- 分页器 -->
+          <!-- 父亲组件给子组件传递数据 子组件使用props接收 -->
+          <!-- 子组件给父组件通信使用自定义事件 -->
+          <Pagination
+            :pageNo="seachKeyWords.pageNo"
+            :pageSize="seachKeyWords.pageSize"
+            :total="total"
+            :continues="5"
+            @getPageNo="getPageNo"
+          />
         </div>
       </div>
     </div>
@@ -134,7 +125,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import SearchSelector from './SearchSelector/SearchSelector'
 export default {
   name: 'Search',
@@ -153,7 +144,7 @@ export default {
         // 关键字
         keyword: '',
         // 排序
-        order: '',
+        order: '1:desc',
         // 当前页数
         pageNo: 1,
         // 分页大小
@@ -169,7 +160,30 @@ export default {
     SearchSelector,
   },
   computed: {
+    // 从vuex中拿到数据
     ...mapGetters(['goodsList']),
+
+    // vuex中拿到total
+    ...mapState({
+      total: (state) => state.search.searchList.total,
+    }),
+
+    // 是否是综合
+    isOne() {
+      return this.seachKeyWords.order.indexOf('1') !== -1
+    },
+    // 是否是价格
+    isTwo() {
+      return this.seachKeyWords.order.indexOf('2') !== -1
+    },
+    // 是否展示↑箭头
+    isAsc() {
+      return this.seachKeyWords.order.indexOf('asc') !== -1
+    },
+    // 是否展示↓箭头
+    isDesc() {
+      return this.seachKeyWords.order.indexOf('desc') !== -1
+    },
   },
   beforeMount() {
     // 发请求之前，把接口需要的参数整理
@@ -221,6 +235,53 @@ export default {
     trademarkInfo(trademark) {
       // console.log(trademark)
       this.seachKeyWords.trademark = `${trademark.tmId}:${trademark.tmName}`
+      this.fetchDataBySearchWords()
+    },
+    // 收集平台售卖属性
+    attrInfo(attr, attrVal) {
+      let props = `${attr.attrId}:${attrVal}:${attr.attrName}`
+      // console.log(attr, attrVal)
+      // 数组去重操作
+      if (this.seachKeyWords.props.indexOf(props) === -1) {
+        this.seachKeyWords.props.push(props)
+      }
+
+      this.fetchDataBySearchWords()
+    },
+    // 删除售卖属性
+    removeAttrVal(index) {
+      // console.log(index)
+      this.seachKeyWords.props.splice(index, 1)
+      this.fetchDataBySearchWords()
+    },
+    // 改变上下箭头
+    changeOrder(flag) {
+      let originOrder = this.seachKeyWords.order
+
+      // 这里最开始获取的是最初始的状态
+      let originFlag = originOrder.split(':')[0]
+      let originSort = originOrder.split(':')[1]
+
+      // 准备一个新的属性值
+      var newOrder = ''
+      // 点的是综合
+      if (flag === originFlag) {
+        newOrder = `${originFlag}:${originSort === 'desc' ? 'asc' : 'desc'}`
+        // console.log(flag)
+        // console.log(newOrder)
+      } else {
+        // 点击的是价格
+        // console.log(flag)
+        newOrder = `${flag}:${'desc'}`
+      }
+      this.seachKeyWords.order = newOrder
+      this.fetchDataBySearchWords()
+    },
+    // 自定义事件获取pageNo当前第一页
+    getPageNo(pageNo) {
+      // console.log(pageNo)
+      // 整理参数传递给服务器
+      this.seachKeyWords.pageNo = pageNo
       this.fetchDataBySearchWords()
     },
   },
